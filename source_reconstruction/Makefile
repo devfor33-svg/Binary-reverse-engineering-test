@@ -12,14 +12,13 @@ else ifneq ($(wildcard /data/data/com.termux/files/usr/include/apt-pkg/cmndline.
     TERMUX_PREFIX := /data/data/com.termux/files/usr
     APT_PKG_CFLAGS := -I$(TERMUX_PREFIX)/include
     APT_PKG_LDFLAGS := -L$(TERMUX_PREFIX)/lib -lapt-pkg -Wl,-rpath=$(TERMUX_PREFIX)/lib
+else
+    $(error apt-pkg headers not found. Install libapt-pkg-dev: sudo apt install libapt-pkg-dev)
 endif
-
-CXXFLAGS += $(APT_PKG_CFLAGS)
-LDFLAGS += $(APT_PKG_LDFLAGS)
 
 TARGET = apt
 
-.PHONY: all clean test install termux-build static
+.PHONY: all clean test install-deps install termux-build static
 
 all: $(TARGET)
 
@@ -28,6 +27,9 @@ $(TARGET): main.cc
 
 clean:
 	rm -f $(TARGET) main.o
+
+install-deps:
+	$(error Please install libapt-pkg-dev: sudo apt install libapt-pkg-dev)
 
 test: $(TARGET)
 	@echo "=== Test 1: --help ==="
