@@ -26,6 +26,7 @@
 #include <sstream>
 #include <algorithm>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 using namespace std;
@@ -333,8 +334,9 @@ bool DoList(CommandLine &CmdL) {
             }
             patternRegex = regex(p, regex::icase);
             hasPattern = true;
-        } catch (...) {
-            hasPattern = false;
+        } catch (const regex_error &e) {
+            cerr << "E: Invalid search pattern: " << e.what() << endl;
+            return false;
         }
     }
 
@@ -524,13 +526,13 @@ bool DoAutoClean(CommandLine &CmdL) {
 }
 
 bool DoSource(CommandLine &CmdL) {
-    cerr << "Supported via 'apt-get source' instead." << endl;
-    return true;
+    cerr << "E: Use 'apt-get source' instead." << endl;
+    return false;
 }
 
 bool DoBuildDep(CommandLine &CmdL) {
-    cerr << "Supported via 'apt-get build-dep' instead." << endl;
-    return true;
+    cerr << "E: Use 'apt-get build-dep' instead." << endl;
+    return false;
 }
 
 bool DoDownload(CommandLine &CmdL) {
@@ -727,19 +729,30 @@ bool ShowSrcPackage(CommandLine &CmdL) {
 }
 
 bool DoChangelog(CommandLine &CmdL) {
-    cerr << "Not implemented. Use 'apt-get changelog' instead." << endl;
-    return true;
+    cerr << "E: Use 'apt-get changelog' instead." << endl;
+    return false;
 }
 
 bool EditSources(CommandLine &CmdL) {
     string sourcesList = _config->Find("Dir::Etc::sourcelist", "/etc/apt/sources.list");
-    string editor = getenv("EDITOR") ? getenv("EDITOR") : "nano";
+    const char *editor = getenv("EDITOR");
+    if (editor == nullptr || editor[0] == '\0')
+        editor = "nano";
 
     cout << "Opening " << sourcesList << " with " << editor << "..." << endl;
-    string cmd = editor + " " + sourcesList;
-    int ret = system(cmd.c_str());
-    if (ret != 0)
-        cerr << "W: Editor returned non-zero exit code" << endl;
+    pid_t pid = fork();
+    if (pid == 0) {
+        execlp(editor, editor, sourcesList.c_str(), (char *)nullptr);
+        _exit(127);
+    } else if (pid > 0) {
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+            cerr << "W: Editor returned non-zero exit code" << endl;
+    } else {
+        cerr << "E: Failed to fork editor" << endl;
+        return false;
+    }
     return true;
 }
 
