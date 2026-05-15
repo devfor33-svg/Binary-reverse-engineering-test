@@ -11,10 +11,18 @@ apt install libapt-pkg-dev g++
 pkg install clang libapt-pkg
 ```
 
-## Build
+## Build & Run
 ```bash
 make          # auto-detects platform
 make test     # validate all commands
+
+# update requires root for lock files
+sudo ./apt update
+
+# other commands run as normal user
+./apt list
+./apt search <package>
+./apt show <package>
 ```
 
 ## Test Results (Linux)
