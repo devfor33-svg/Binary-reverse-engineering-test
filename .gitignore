@@ -1,0 +1,5 @@
+*.o
+apt
+test_simple
+# Token file - NEVER commit
+/root/github_token.txt

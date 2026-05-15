@@ -1,0 +1,9 @@
+# Termux official APT repository
+# Place this file in /data/data/com.termux/files/usr/etc/apt/sources.list.d/
+# or in /etc/apt/sources.list.d/ for cross-platform setups
+
+Types: deb
+URIs: https://packages.termux.dev/apt/termux-main
+Suites: stable
+Components: main
+Trusted: yes

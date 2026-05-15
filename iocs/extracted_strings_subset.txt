@@ -1,0 +1,12 @@
+Android (13989888, +pgo, +bolt, +lto, +mlgo, based on r563880c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f06077099aa41290cdb4c5e6fa0f59349)
+/data/data/com.termux/files/usr/lib
+libapt-pkg.so
+libapt-private.so
+libc++_shared.so
+libc.so
+libdl.so
+Linker: LLD 21.0.0 (/mnt/disks/build-disk/src/googleplex-android/llvm-r563880-release/out/llvm-project/llvm 5e96669f06077099aa41290cdb4c5e6fa0f59349)
+modernize .list files to .sources files
+/system/bin/linker64
+upgrade the system by installing/upgrading packages
+upgrade the system by removing/installing/upgrading packages
