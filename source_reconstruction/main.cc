@@ -159,11 +159,30 @@ bool DoInstall(CommandLine &CmdL) {
         return false;
     }
 
+    pkgRecords Recs(*PkgCache);
+    pkgAcquire Fetcher;
+
+    if (!PM->GetArchives(&Fetcher, Cache.GetSourceList(), &Recs)) {
+        cerr << "E: Failed to queue archives for download" << endl;
+        if (_error->PendingError())
+            _error->DumpErrors(cerr);
+        delete PM;
+        return false;
+    }
+
+    if (Fetcher.Run() != pkgAcquire::Continue) {
+        cerr << "E: Failed to download packages" << endl;
+        if (_error->PendingError())
+            _error->DumpErrors(cerr);
+        delete PM;
+        return false;
+    }
+
     APT::Progress::PackageManagerText PMProgress;
-    bool result = PM->DoInstall(&PMProgress);
+    pkgPackageManager::OrderResult result = PM->DoInstall(&PMProgress);
     delete PM;
-    if (!result) {
-        cerr << "E: Installation failed" << endl;
+    if (result != pkgPackageManager::Completed) {
+        cerr << "E: Installation failed (order result: " << result << ")" << endl;
         if (_error->PendingError())
             _error->DumpErrors(cerr);
         return false;
