@@ -4,16 +4,22 @@ CXXFLAGS ?= -Wall -O2 -std=c++17
 UNAME_S := $(shell uname -s)
 UNAME_M := $(shell uname -m)
 
-# Prefer system apt-pkg headers, fallback to Termux
-ifneq ($(wildcard /usr/include/apt-pkg/cmndline.h),)
-    APT_PKG_CFLAGS :=
-    APT_PKG_LDFLAGS := -lapt-pkg
-else ifneq ($(wildcard /data/data/com.termux/files/usr/include/apt-pkg/cmndline.h),)
-    TERMUX_PREFIX := /data/data/com.termux/files/usr
-    APT_PKG_CFLAGS := -I$(TERMUX_PREFIX)/include
-    APT_PKG_LDFLAGS := -L$(TERMUX_PREFIX)/lib -lapt-pkg -Wl,-rpath=$(TERMUX_PREFIX)/lib
-else
-    $(error apt-pkg headers not found. Install libapt-pkg-dev: sudo apt install libapt-pkg-dev)
+# Try pkg-config first (most reliable), fallback to hardcoded paths
+APT_PKG_CFLAGS := $(shell pkg-config --cflags apt-pkg 2>/dev/null)
+APT_PKG_LDFLAGS := $(shell pkg-config --libs apt-pkg 2>/dev/null)
+
+ifeq ($(APT_PKG_LDFLAGS),)
+    # pkg-config failed, try hardcoded paths
+    ifneq ($(wildcard /usr/include/apt-pkg/cmndline.h),)
+        APT_PKG_CFLAGS :=
+        APT_PKG_LDFLAGS := -lapt-pkg
+    else ifneq ($(wildcard /data/data/com.termux/files/usr/include/apt-pkg/cmndline.h),)
+        TERMUX_PREFIX := /data/data/com.termux/files/usr
+        APT_PKG_CFLAGS := -I$(TERMUX_PREFIX)/include
+        APT_PKG_LDFLAGS := -L$(TERMUX_PREFIX)/lib -lapt-pkg -Wl,-rpath=$(TERMUX_PREFIX)/lib
+    else
+        $(error apt-pkg not found. Install: sudo apt install libapt-pkg-dev)
+    endif
 endif
 
 TARGET = apt
@@ -29,7 +35,7 @@ clean:
 	rm -f $(TARGET) main.o
 
 install-deps:
-	$(error Please install libapt-pkg-dev: sudo apt install libapt-pkg-dev)
+	sudo apt install -y libapt-pkg-dev
 
 test: $(TARGET)
 	@echo "=== Test 1: --help ==="
