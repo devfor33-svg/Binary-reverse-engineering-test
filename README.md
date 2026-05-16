@@ -47,5 +47,5 @@ make test   # runs all 11 command tests
 
 
 > **⚠️ LEGAL NOTICE**  
-> This project is for **educational reverse engineering** only. The patched binary is NOT included in this repository. To run the experiments, you must patch the original Termux binary yourself using the instructions below.  
+> This project is for **educational reverse engineering** only. 
 > This project is **not affiliated with Termux**.
